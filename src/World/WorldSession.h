@@ -22,9 +22,11 @@
 #include "Opcodes.h"
 #include "WorldPacket.h"
 #include "SharedDefines.h"
+#include "Cache.h"
 #include "Player.h"
 #include "ObjectGuid.h"
 #include "EventMgr.h"
+#include "ChatMgr.h"
 #include "WorldSocket.h"
 #include <queue>
 
@@ -42,14 +44,17 @@ class WorldSession
         void HandleConsoleCommand(std::string cmd);
 
         WorldSocket* GetSocket();
+        const PlayerNameCache* GetPlayerNameCache();
     private:
         std::shared_ptr<Session> session_;
         uint32 clientSeed_;
         uint32 serverSeed_;
 
         WorldSocket socket_;
+        ChatMgr chatMgr_;
         EventMgr eventMgr_;
         Player player_;
+        PlayerNameCache playerNames_;
 
         uint64 lastPingTime_;
         uint32 ping_;
@@ -63,6 +68,15 @@ class WorldSession
         void HandleAuthenticationChallenge(WorldPacket &recvPacket);
         void HandleAuthenticationResponse(WorldPacket &recvPacket);
 
+    // ChannelHandler.cpp
+    private:
+        void JoinChannel(const std::string name, const std::string password = "");
+        void HandleChannelNotification(WorldPacket &recvPacket);
+
+    // ChatHandler.cpp
+    private:
+        void HandleMessageChat(WorldPacket &recvPacket);
+
     // CharacterHandler.cpp
     private:
         void HandleCharacterEnum(WorldPacket &recvPacket);
@@ -73,4 +87,9 @@ class WorldSession
         void HandlePong(WorldPacket &recvPacket);
         void SendPing();
         void HandleTimeSyncRequest(WorldPacket &recvPacket);
+
+    // QueryHandler.cpp
+    private:
+        void SendNameQuery(ObjectGuid guid);
+        void HandleNameQueryResponse(WorldPacket &recvPacket);
 };

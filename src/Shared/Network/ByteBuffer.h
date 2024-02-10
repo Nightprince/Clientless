@@ -24,6 +24,7 @@
 #include "ByteConverter.h"
 #include "World/ObjectGuid.h"
 
+#include <iostream>
 #include <exception>
 #include <list>
 #include <map>
@@ -442,30 +443,28 @@ class ByteBuffer
             rpos_ += len;
         }
 
-        uint64 readPackGUID()
+        void readPackGUID(uint64_t& guid)
         {
             if (rpos() + 1 > size())
                 throw ByteBufferPositionException(false, rpos_, 1, size());
 
-            uint64 guid = 0;
+            guid = 0;
 
-            uint8 guidmark = 0;
+            uint8_t guidmark = 0;
             (*this) >> guidmark;
 
             for (int i = 0; i < 8; ++i)
             {
-                if (guidmark & (uint8(1) << i))
+                if (guidmark & (uint8_t(1) << i))
                 {
                     if (rpos() + 1 > size())
                         throw ByteBufferPositionException(false, rpos_, 1, size());
 
-                    uint8 bit;
+                    uint8_t bit;
                     (*this) >> bit;
-                    guid |= (uint64(bit) << (i * 8));
+                    guid |= (uint64_t(bit) << (i * 8));
                 }
             }
-
-            return guid;
         }
 
         uint32 ReadPackedTime()
